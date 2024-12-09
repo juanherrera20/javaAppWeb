@@ -12,6 +12,14 @@ public class Empleado {
     }
 
     //Constructor de inicializacion
+    public Empleado( String nombres, String apellidos, String fechaIngreso, double sueldo) {
+        this.nombres = nombres;
+        this.apellidos = apellidos;
+        this.fechaIngreso = fechaIngreso;
+        this.sueldo = sueldo;
+    }
+
+    // Constructor con ID para actualizaciones
     public Empleado(int id, String nombres, String apellidos, String fechaIngreso, double sueldo) {
         this.id = id;
         this.nombres = nombres;

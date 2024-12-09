@@ -21,12 +21,12 @@ public class EmpleadoDAO {
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 Empleado empleado = new Empleado(
-                        rs.getInt("id"),
-                        rs.getString("nombres"),
-                        rs.getString("apellidos"),
-                        rs.getString("fecha_ingreso"),
-                        rs.getDouble("sueldo")
+                    rs.getString("nombres"),
+                    rs.getString("apellidos"),
+                    rs.getString("fecha_ingreso"),
+                    rs.getDouble("sueldo")
                 );
+                empleado.setId(rs.getInt("id")) ;
                 empleados.add(empleado);
             }
         } catch (SQLException e) {
@@ -64,19 +64,14 @@ public class EmpleadoDAO {
         return null;
     }
 
-
-
-
-    //Metodo para agregar CRUD
-    public boolean agregarLibro(String titulo, String autor, String genero, int anioPublicacion, boolean disponible) {
-        String query = "INSERT INTO empleados (titulo, autor, genero, anio_publicacion, disponible) VALUES (?, ?, ?, ?, ?)";
+    public boolean insertarEmpleado(Empleado empleado) {
+        String query = "INSERT INTO empleados (nombres, apellidos, fecha_ingreso, sueldo) VALUES (?, ?, ?, ?)";
         try (Connection conn = conexionBD.conectar();
             PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, titulo);
-            pstmt.setString(2, autor);
-            pstmt.setString(3, genero);
-            pstmt.setInt(4, anioPublicacion);
-            pstmt.setBoolean(5, disponible);
+            pstmt.setString(1, empleado.getNombres());
+            pstmt.setString(2, empleado.getApellidos());
+            pstmt.setString(3, empleado.getFechaIngreso());
+            pstmt.setDouble(4, empleado.getSueldo());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,17 +79,30 @@ public class EmpleadoDAO {
         }
     }
 
-    // Metodo para editar CRUD
-    public boolean editarLibro(int idLibro, String titulo, String autor, String genero, int anioPublicacion, boolean disponible) {
-        String query = "UPDATE empleados SET titulo = ?, autor = ?, genero = ?, anio_publicacion = ?, disponible = ? WHERE id_libro = ?";
+    public void actualizarEmpleado(Empleado empleado) {
+        try (Connection conn = conexionBD.conectar()) {
+            String sql = "UPDATE empleados SET nombres = ?, apellidos = ?, fecha_ingreso = ?, sueldo = ? WHERE id = ?";
+            System.out.println("Esto recibi en DAO" + empleado.getId());
+            System.out.println("el nombres" + empleado.getNombres());
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, empleado.getNombres());
+                stmt.setString(2, empleado.getApellidos());
+                stmt.setString(3, empleado.getFechaIngreso());
+                stmt.setDouble(4, empleado.getSueldo());
+                stmt.setInt(5, empleado.getId());
+
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean eliminarEmpleado(int id) {
+        String query = "DELETE FROM empleados WHERE id = ?";
         try (Connection conn = conexionBD.conectar();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, titulo);
-            pstmt.setString(2, autor);
-            pstmt.setString(3, genero);
-            pstmt.setInt(4, anioPublicacion);
-            pstmt.setBoolean(5, disponible);
-            pstmt.setInt(6, idLibro);
+            pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -102,16 +110,4 @@ public class EmpleadoDAO {
         }
     }
 
-    //Metodo para el eliminar CRUD
-    public boolean eliminarLibro(int idLibro) {
-        String query = "DELETE FROM empleados WHERE id_libro = ?";
-        try (Connection conn = conexionBD.conectar();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setInt(1, idLibro);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }
