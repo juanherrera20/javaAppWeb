@@ -10,7 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
+        EmpleadoDAO dao = new EmpleadoDAO();
+        List<Empleado> empleados = dao.obtenerDatos();
 
+        if (empleados != null && !empleados.isEmpty()) {
+            empleados.forEach(System.out::println);
+        } else {
+            System.out.println("No se encontraron empleados.");
+        }
     }
 }

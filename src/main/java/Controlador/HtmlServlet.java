@@ -22,7 +22,7 @@ public class HtmlServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         ServletOutputStream out = response.getOutputStream();
 
-        System.out.println("jajajajajjajajaja");
+
         out.print("<html>" +
                 "<head><title>Pagina Servlet</title></head>"+
                 "<body><h2>" +

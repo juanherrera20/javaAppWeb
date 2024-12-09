@@ -1,31 +1,24 @@
 package Controlador;
 
-import Config.ConexionBD;
-import Modelo.Empleado;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import Config.ConexionBD;
+import Modelo.Empleado;
+
+
 public class EmpleadoDAO {
 
-    private final Connection conn;
+    private ConexionBD conexionBD = new ConexionBD(); // Instanciar la clase
 
-    public EmpleadoDAO() {
-        this.conn = ConexionBD.conectar();
-    }
-
-    // Listar todos los empleados
-    public List<Empleado> obtenerDatos() throws SQLException {
+    //Listar los libros de la biblioteca
+    public List<Empleado> obtenerDatos() {
         List<Empleado> empleados = new ArrayList<>();
         String query = "SELECT * FROM empleados";
-
-        try (PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
+        try (Connection conn = conexionBD.conectar(); // Llamada al método no estático
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 Empleado empleado = new Empleado(
                         rs.getInt("id"),
@@ -36,18 +29,24 @@ public class EmpleadoDAO {
                 );
                 empleados.add(empleado);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
         return empleados;
     }
 
     // Obtener un empleado por ID
-    public Empleado obtenerEmpleadoPorId(int id) throws SQLException {
+    public Empleado obtenerEmpleadoPorId(int id) {
         String query = "SELECT * FROM empleados WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
+        System.out.println("Iniciando búsqueda para el empleado con ID: " + id);
+        try (Connection conn = conexionBD.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, id);
+            System.out.println("Ejecutando la consulta...");
+            try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
+                    System.out.println("Empleado encontrado en la base de datos.");
                     return new Empleado(
                             rs.getInt("id"),
                             rs.getString("nombres"),
@@ -55,43 +54,64 @@ public class EmpleadoDAO {
                             rs.getString("fecha_ingreso"),
                             rs.getDouble("sueldo")
                     );
+                } else {
+                    System.out.println("Empleado no encontrado.");
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
-    // Crear un nuevo empleado
-    public void crearEmpleado(Empleado empleado) throws SQLException {
-        String query = "INSERT INTO empleados (nombres, apellidos, fecha_ingreso, sueldo) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, empleado.getNombres());
-            stmt.setString(2, empleado.getApellidos());
-            stmt.setString(3, empleado.getFechaIngreso());
-            stmt.setDouble(4, empleado.getSueldo());
-            stmt.executeUpdate();
+
+
+
+    //Metodo para agregar CRUD
+    public boolean agregarLibro(String titulo, String autor, String genero, int anioPublicacion, boolean disponible) {
+        String query = "INSERT INTO empleados (titulo, autor, genero, anio_publicacion, disponible) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = conexionBD.conectar();
+            PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, titulo);
+            pstmt.setString(2, autor);
+            pstmt.setString(3, genero);
+            pstmt.setInt(4, anioPublicacion);
+            pstmt.setBoolean(5, disponible);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    // Actualizar un empleado
-    public void actualizarEmpleado(Empleado empleado) throws SQLException {
-        String query = "UPDATE empleados SET nombres = ?, apellidos = ?, fecha_ingreso = ?, sueldo = ? WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, empleado.getNombres());
-            stmt.setString(2, empleado.getApellidos());
-            stmt.setString(3, empleado.getFechaIngreso());
-            stmt.setDouble(4, empleado.getSueldo());
-            stmt.setInt(5, empleado.getId());
-            stmt.executeUpdate();
+    // Metodo para editar CRUD
+    public boolean editarLibro(int idLibro, String titulo, String autor, String genero, int anioPublicacion, boolean disponible) {
+        String query = "UPDATE empleados SET titulo = ?, autor = ?, genero = ?, anio_publicacion = ?, disponible = ? WHERE id_libro = ?";
+        try (Connection conn = conexionBD.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, titulo);
+            pstmt.setString(2, autor);
+            pstmt.setString(3, genero);
+            pstmt.setInt(4, anioPublicacion);
+            pstmt.setBoolean(5, disponible);
+            pstmt.setInt(6, idLibro);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    // Eliminar un empleado
-    public void eliminarEmpleado(int id) throws SQLException {
-        String query = "DELETE FROM empleados WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
+    //Metodo para el eliminar CRUD
+    public boolean eliminarLibro(int idLibro) {
+        String query = "DELETE FROM empleados WHERE id_libro = ?";
+        try (Connection conn = conexionBD.conectar();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, idLibro);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 public class ConexionBD {
 
-    //Creo un elemento tipo Connection
     private static Connection conn = null;
 
     private static final String DATABASE = "empleados_db";
@@ -16,16 +15,18 @@ public class ConexionBD {
     private static final String PASSWORD = "1004528186";
     private static final String URL = "jdbc:mysql://localhost:3307/" + DATABASE;
 
-    // Método para retornar la conexion a la base de datos
     public static Connection conectar() {
         try {
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);  //Metodo simplificado
-            System.out.println("Base de datos conectada con éxito.");
+            // Intenta la conexión
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("Conexión exitosa a la base de datos.");
         } catch (SQLException ex) {
-            System.out.println("Error al momento de conectarse a la base de datos.");
+            // Muestra información del error
+            System.err.println("Error al conectar a la base de datos.!!!");
             Logger.getLogger(ConexionBD.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
 
-        return conn; // Devuelve la conexión
+        return conn;
     }
 }
